@@ -1,0 +1,58 @@
+---
+- name: Configuring SQL DB on Controller Node!
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars:
+    db_pkg1: mariadb-server
+    db_pkg2: python3-pymysql
+    db_src: files/99-openstack.cnf
+    db_dest: /etc/mysql/mariadb.conf.d/99-openstack.cnf
+    db_passwd: Nepal@123
+    mysql_socket: /run/mysqld/mysqld.sock
+
+  tasks:
+    - name: Ensure DB packages is present
+      apt:
+        name:
+          - "{{ db_pkg1 }}"
+          - "{{ db_pkg2 }}"
+        state: latest
+        update_cache: yes 
+    
+    - name: Updating configuration files
+      copy:
+        src: "{{ db_src }}"
+        dest: "{{ db_dest }}"
+
+    - name: Restarting MariaDB service
+      service:
+        name: mariadb
+        state: restarted
+        enabled: true
+
+
+    - name: Securing DB
+      mysql_user:
+        name: root
+        update_password: always
+        password: "{{ db_passwd }}"
+        login_unix_socket: "{{ mysql_socket }}" 
+      
+    - name: Authentication credentials copying
+      copy:
+        src: files/my.cnf
+        dest: /root/.my.cnf
+   
+    - name: Removing Anonymous users
+      mysql_user:
+        name: ''
+        state: absent
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Removing test DB
+      mysql_db:
+        name: test
+        state: absent
+        login_unix_socket: "{{ mysql_socket }}"
+ 

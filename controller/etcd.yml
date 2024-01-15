@@ -1,0 +1,28 @@
+---
+- name: Configuring etcd on controller
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars:
+    etcd_pkg: etcd
+    etcd_src: files/etcd
+    etcd_dst: /etc/default/etcd
+
+  tasks:
+    - name: Ensure etcd packages is present 
+      apt:
+        name:
+          - "{{ etcd_pkg }}"
+        state: latest
+        update_cache: yes 
+
+    - name: Updating the etcd configuration file
+      copy:
+        src: "{{ etcd_src }}"
+        dest: "{{ etcd_dst }}"
+
+    - name: Ensure service is up and running
+      service:
+        name: etcd
+        state: restarted
+        enabled: yes

@@ -1,0 +1,81 @@
+---
+- name: Configuring Keystone Services on Controller Node!
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars:
+    db_name: keystone
+    db_user: keystone
+    db_pass: Keystone_123
+    mysql_socket: /run/mysqld/mysqld.sock
+    keystone_pkg: keystone
+    keystone_src: files/keystone.conf
+    keystone_dest: /etc/keystone/keystone.conf
+    keystone_user: keystone
+    keystone_group: keystone
+    admin_pass: Admin_123
+    web_src: files/apache2.conf
+    web_dest: /etc/apache2/apache2.conf
+
+  tasks:
+    - name: Ensure keystone database is present 
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+    
+    - name: Ensure keystone DB user (localhost)
+      mysql_user:
+        name: "{{ db_user }}"
+        update_password: always
+        password: "{{ db_pass }}"
+        host: "localhost"
+        priv: "keystone.*:ALL"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure keystone DB user (%)
+      mysql_user:
+        name: "{{ db_user }}"
+        update_password: always 
+        password: "{{ db_pass }}"
+        host: "%"
+        priv: "keystone.*:ALL"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure keystone is present
+      apt:
+        name:
+          - "{{ keystone_pkg }}"
+        state: latest
+        update_cache: yes
+
+    - name: updating keystone configuration
+      copy:
+        src: "{{ keystone_src }}"
+        dest: "{{ keystone_dest }}"
+
+    - name: Populate Identity service database
+      command: su -s /bin/sh -c "keystone-manage db_sync" "{{ keystone_user }}"
+    
+    - name: Initialize Fernet key repositories
+      command: keystone-manage fernet_setup --keystone-user "{{ keystone_user }}" --keystone-group "{{ keystone_group }}"
+
+    - name: same as above
+      command: keystone-manage credential_setup --keystone-user "{{ keystone_user }}" --keystone-group "{{ keystone_group }}"
+
+    - name: Bootstrap the Identity service
+      command: keystone-manage bootstrap --bootstrap-password "{{ admin_pass }}" --bootstrap-admin-url http://controller:5000/v3/ --bootstrap-internal-url http://controller:5000/v3/ --bootstrap-public-url http://controller:5000/v3/ --bootstrap-region-id RegionOne
+
+
+    - name: Updating Apache Server
+      copy:
+        src: "{{ web_src }}"
+        dest: "{{ web_dest }}"
+
+    - name: Ensure Apache service is up and running
+      service:
+        name: apache2
+        state: restarted
+        enabled: true

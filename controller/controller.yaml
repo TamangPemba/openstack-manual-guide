@@ -1,0 +1,47 @@
+---
+- name: Configuring Controller node 
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars:
+    hostname: controller.missionopenstack.com.np
+    ntp_src: files/chrony.conf
+    ntp_dest: /etc/chrony/chrony.conf
+    openstack_repo: cloud-archive:bobcat
+    openstack_compute: nova-compute
+    openstack_client: python3-openstackclient
+
+  tasks:
+    - name: setting hostname
+      hostname:
+        name: "{{ hostname }}" 
+    
+    - name: ensure ntp is present on controller node
+      apt:
+        name: chrony
+        state: present
+    
+    - name: setup ntp server
+      copy:
+        src: "{{ ntp_src }}"
+        dest: "{{ ntp_dest }}" 
+
+    - name: ensure ntp service is up and running
+      service:
+        name: chronyd
+        state: restarted
+        enabled: yes 
+        
+    - name: syncing NTP servers 
+      command: chronyc sources
+
+    - name: Ensure OpensStack repository is present
+      command: add-apt-repository -y "{{ openstack_repo }}"
+
+    - name: Sample installation from the repo
+      apt:
+        name:
+          - "{{ openstack_compute }}"
+          - "{{ openstack_client }}"
+        state: latest
+        update_cache: yes 

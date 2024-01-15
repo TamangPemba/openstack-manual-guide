@@ -1,0 +1,33 @@
+---
+- name: Configuring rabbitmq-server on Controller node 
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars:
+    msg_pkg: rabbitmq-server
+    rabbitmq_user: openstack
+    rabbitmq_passwd: Rabbit@123
+
+  tasks:
+    - name: Ensure rabbitmq-server is present
+      apt:
+        name:
+          - "{{ msg_pkg }}"
+        state: latest
+        update_cache: yes 
+
+    - name: Creating RabbitMQ user 
+      rabbitmq_user:
+        user: "{{ rabbitmq_user }}"
+        password: "{{ rabbitmq_passwd }}"
+
+    - name: Setting Permissions
+      rabbitmq_user:
+        user: "{{ rabbitmq_user }}"
+        password: "{{rabbitmq_passwd }}"
+        permissions:
+          - vhost: /
+            configure_priv: .*
+            read_priv: .*
+            write_priv: .*
+        state: present

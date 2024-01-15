@@ -1,0 +1,30 @@
+---
+- name: Configuring memcache on Controller node 
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars:
+    mem_pkg: memcached
+    python_pkg: python3-memcache
+    mem_src: files/memcached.conf
+    mem_dest: /etc/memcached.conf
+
+  tasks:
+    - name: Ensure memcached and python3-memcache are present
+      apt:
+        name:
+          - "{{ mem_pkg }}"
+          - "{{ python_pkg }}"
+        state: latest
+        update_cache: yes
+
+    - name: updating memcache configuration file
+      copy:
+        src: "{{ mem_src }}"
+        dest: "{{ mem_dest }}" 
+    
+    - name: Ensure the memcached service are up and running
+      service:
+        name: memcached
+        state: restarted
+        enabled: yes 
