@@ -1,0 +1,9 @@
+db_name: glance
+db_user: glance
+db_pass: Glance_123
+mysql_socket: /run/mysqld/mysqld.sock
+glance_pkg: glance
+glance_src: "{{ playbook_dir }}/files/glance-api.conf"
+glance_dest: /etc/glance/glance-api.conf
+glance_user: glance
+glance_domain: Default

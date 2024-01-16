@@ -7,12 +7,11 @@
     env_src: files/adminenv
     env_dest: /root/adminenv
   tasks:
-    - name: ensure env variables for admin is present
+    - name: Ensure env variables are present on root home directory
       copy:
         src: "{{ env_src }}"
         dest: "{{ env_dest }}"
 
-    - name: Configuring env variables using script
-      shell:
-        cmd: source "{{ env_dest }}"
-        executable: /bin/bash 
+    - name: =======NOTE==========
+      debug:
+        msg: "use source adminenv (filename) on root home directory of controller node to set env variables"

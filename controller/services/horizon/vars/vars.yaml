@@ -1,0 +1,5 @@
+dep_pkg: django
+horizon_pkg: openstack-dashboard
+web_src: "{{ playbook_dir }}/files/local_settings.py"
+web_dest:  /etc/openstack-dashboard/local_settings.py
+

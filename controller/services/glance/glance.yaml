@@ -1,0 +1,59 @@
+---
+- name: Configuring Glance Service on Controller Node!
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars_files:
+    - vars/vars.yaml
+
+  tasks:
+    - name: Ensure glance database is present
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure glance DB user (localhost)
+      mysql_user:
+        name: "{{ db_user }}"
+        update_password: always
+        password: "{{ db_pass }}"
+        host: "localhost"
+        priv: "glance.*:ALL"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure glance DB user (%)
+      mysql_user:
+        name: "{{ db_user }}"
+        update_password: always
+        password: "{{ db_pass }}"
+        host: "%"
+        priv: "glance.*:ALL"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure glance is present
+      apt:
+        name:
+          - "{{ glance_pkg }}"
+        state: latest
+        update_cache: yes
+
+    - name: Updating the glance configuration file
+      copy:
+        src: "{{ glance_src }}"
+        dest: "{{ glance_dest }}"
+
+    - name: =======NOTE To ensure read access to glance! ====== 
+      debug:
+        msg: "RUN from controller node shell:  openstack role add --user glance --user-domain Default --system all reader"
+    
+    - name: Pupulating Image Service DB
+      command: su -s /bin/sh -c "glance-manage db_sync" "{{ glance_user }}"
+        
+    - name: Ensure glance-api service is up and running
+      service:
+        name: glance-api
+        state: restarted
+        enabled: yes

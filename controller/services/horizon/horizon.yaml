@@ -1,0 +1,34 @@
+---
+- name: Configuring Horizon Service on Controller Node!
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars_files:
+    - vars/vars.yaml
+
+  tasks:
+    - name: Ensure Django is present (dependencies)
+      pip:
+        name:
+          - "{{ dep_pkg }}"
+        state: present
+
+    - name: Veryfying Django Version
+      command: python3 -m django --version
+
+    - name: Ensure openstack-dashboard is present
+      apt:
+        name:
+          - "{{ horizon_pkg }}"
+        state: present
+
+    - name: Updating Web Server Configuration
+      copy:
+        src: "{{ web_src }}"
+        dest: "{{ web_dest }}"
+
+    - name: Ensure Web Service is up and running
+      service:
+        name: apache2
+        state: reloaded
+        enabled: yes
