@@ -1,0 +1,16 @@
+source admin-openrc
+
+1. Creating placement service user 
+openstack user create --domain default --password-prompt placement
+
+2. adding placement user to the service project with admin role:
+openstack role add --project service --user placement admin
+
+3. creating placement api entry in the service catalog
+openstack service create --name placement --description "Placement API" placement
+
+4. creating placement API services endpoint 
+openstack endpoint create --region RegionOne  placement public http://controller:8778
+openstack endpoint create --region RegionOne placement internal http://controller:8778
+openstack endpoint create --region RegionOne placement admin http://controller:8778
+

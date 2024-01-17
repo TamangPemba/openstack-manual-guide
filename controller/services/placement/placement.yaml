@@ -1,0 +1,60 @@
+---
+- name: Configuring Placement Service on Controller Node!
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars_files:
+    - vars/vars.yaml
+
+  tasks:
+    - name: Ensure placement database is present
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure placement DB user (localhost)
+      mysql_user:
+        name: "{{ db_user }}"
+        update_password: always
+        password: "{{ db_pass }}"
+        host: "localhost"
+        priv: "placement.*:ALL"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure placement DB user (%)
+      mysql_user:
+        name: "{{ db_user }}"
+        update_password: always
+        password: "{{ db_pass }}"
+        host: "%"
+        priv: "placement.*:ALL"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure placement is present
+      apt:
+        name:
+          - "{{ placement_pkg }}"
+        state: latest
+        update_cache: yes
+
+    - name: Updating the placement configuration file
+      copy:
+        src: "{{ placement_src }}"
+        dest: "{{ placement_dest }}"
+
+    - name: CMD for placement
+      copy:
+        src: "{{ placementcmd_src }}"
+        dest: "{{ placementcmd_dest }}"
+
+    - name: Pupulating Image Service DB
+      command: su -s /bin/sh -c "placement-manage db sync" "{{ db_name }}"
+        
+    - name: Ensure apache2 service is up and running
+      service:
+        name: apache2
+        state: restarted
+        enabled: yes

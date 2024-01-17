@@ -1,0 +1,11 @@
+db_name: placement
+db_user: placement
+db_pass: Placement_123
+mysql_socket: /run/mysqld/mysqld.sock
+placement_pkg: placement-api
+placement_src: "{{ playbook_dir }}/files/placement.conf"
+placement_dest: /etc/placement/placement.conf
+placement_user: placement
+placement_domain: Default
+placementcmd_src: "{{ playbook_dir }}/files/placementcmd.txt"
+placementcmd_dest: /root
