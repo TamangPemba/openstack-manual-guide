@@ -1,0 +1,38 @@
+---
+- name: Configuring Neutron Service on Compute Node!
+  hosts: compute
+  become: true
+  ignore_errors: true
+  vars_files:
+    - vars/vars.yaml
+
+  tasks:
+    - name: Ensure neutron is present
+      apt:
+        name: "{{ neutron_pkg}}"
+        state: latest
+        update_cache: yes
+
+    - name: Updating the neutron configuration file
+      copy:
+        src: "{{ neutron_src }}"
+        dest: "{{ neutron_dest }}"
+   
+    - name: Updating the openvswitch configuration file
+      copy:
+        src: "{{ openvswitch_src }}"
+        dest: "{{ openvswitch_dest }}"
+    
+    - name: Updating the nova configuration file
+      copy:
+        src: "{{ nova_src }}"
+        dest: "{{ nova_dest }}"
+
+    - name: Ensure neutron service is up and running
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      loop:
+        - nova-compute
+        - neutron-openvswitch-agent

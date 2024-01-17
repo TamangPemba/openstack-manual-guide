@@ -1,0 +1,93 @@
+---
+- name: Configuring Neutron Service on Controller Node!
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars_files:
+    - vars/vars.yaml
+
+  tasks:
+    - name: Ensure neutron database is present
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure neutron DB user (localhost)
+      mysql_user:
+        name: "{{ db_user }}"
+        update_password: always
+        password: "{{ db_pass }}"
+        host: "localhost"
+        priv: "neutron.*:ALL"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure neutron DB user (%)
+      mysql_user:
+        name: "{{ db_user }}"
+        update_password: always
+        password: "{{ db_pass }}"
+        host: "%"
+        priv: "neutron.*:ALL"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure neutron is present
+      apt:
+        name: "{{ item }}"
+        state: latest
+        update_cache: yes
+      loop:
+        - neutron-server
+        - neutron-plugin-ml2
+        - neutron-openvswitch-agent
+        - neutron-l3-agent
+        - neutron-dhcp-agent
+        - neutron-metadata-agent
+
+    - name: Updating the neutron configuration file
+      copy:
+        src: "{{ neutron_src }}"
+        dest: "{{ neutron_dest }}"
+   
+    - name: Updating the dhcp_agent configuration file
+      copy:
+        src: "{{ dhcp_src }}"
+        dest: "{{ dhcp_dest }}"
+
+    - name: Updating the ml2 configuration file
+      copy:
+        src: "{{ ml2_src }}"
+        dest: "{{ ml2_dest }}"
+        
+    - name: Updating the openvswitch configuration file
+      copy:
+        src: "{{ openvswitch_src }}"
+        dest: "{{ openvswitch_dest }}"
+    
+    - name: Updating the metadata configuration file
+      copy:
+        src: "{{ metadata_src }}"
+        dest: "{{ metadata_dest }}"
+
+    - name: Updating the nova configuration file
+      copy:
+        src: "{{ nova_src }}"
+        dest: "{{ nova_dest }}"
+
+    - name: Pupulating Image Service DB
+      command: su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" "{{ db_name }}"
+        
+    - name: Ensure neutron-api service is up and running
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      loop:
+        - nova-api
+        - neutron-server
+        - neutron-openvswitch-agent
+        - neutron-dhcp-agent
+        - neutron-metadata-agent
+        - neutron-l3-agent 

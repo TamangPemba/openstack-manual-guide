@@ -1,0 +1,18 @@
+db_name: neutron
+db_user: neutron
+db_pass: Neutron_123
+mysql_socket: /run/mysqld/mysqld.sock
+neutron_src: "{{ playbook_dir }}/files/neutron.conf"
+neutron_dest: /etc/neutron/neutron.conf
+neutron_user: neutron
+neutron_domain: Default
+dhcp_src: "{{ playbook_dir }}/files/dhcp_agent.ini"
+dhcp_dest: /etc/neutron/dhcp_agent.ini
+ml2_src: "{{ playbook_dir }}/files/ml2_conf.ini"
+ml2_dest: /etc/neutron/plugins/ml2/ml2_conf.ini
+openvswitch_src: "{{ playbook_dir }}/files/openvswitch_agent.ini"
+openvswitch_dest: /etc/neutron/plugins/ml2/openvswitch_agent.ini
+metadata_src: "{{ playbook_dir }}/files/metadata_agent.ini"
+metadata_dest: /etc/neutron/metadata_agent.ini
+nova_src: "{{ playbook_dir }}/files/nova.conf"
+nova_dest: /etc/nova/nova.conf
