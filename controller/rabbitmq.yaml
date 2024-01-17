@@ -6,7 +6,7 @@
   vars:
     msg_pkg: rabbitmq-server
     rabbitmq_user: openstack
-    rabbitmq_passwd: Rabbit@123
+    rabbitmq_passwd: Rabbit_123
 
   tasks:
     - name: Ensure rabbitmq-server is present
