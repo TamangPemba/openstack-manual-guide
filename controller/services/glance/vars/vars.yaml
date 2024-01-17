@@ -7,3 +7,5 @@ glance_src: "{{ playbook_dir }}/files/glance-api.conf"
 glance_dest: /etc/glance/glance-api.conf
 glance_user: glance
 glance_domain: Default
+glancecmd_src: "{{ playbook_dir }}/files/glancecmd.txt"
+glancecmd_dest: /root/

@@ -44,6 +44,11 @@
       copy:
         src: "{{ glance_src }}"
         dest: "{{ glance_dest }}"
+    
+    - name: Copying glance cmd file 
+      copy:
+        src: "{{ glancecmd_src }}"
+        dest: "{{ glancecmd_dest }}"
 
     - name: =======NOTE To ensure read access to glance! ====== 
       debug:
