@@ -1,0 +1,30 @@
+---
+- name: Configuring Nova Service on Compute Node!
+  hosts: compute
+  become: true
+  ignore_errors: true
+  vars_files:
+    - vars/vars.yaml
+
+  tasks:
+    - name: Ensure nova Packages is present
+      apt:
+        name: "{{ nova_pkg }}"
+        state: latest
+        update_cache: yes
+
+    - name: Updating the nova configuration file
+      copy:
+        src: "{{ nova_src }}"
+        dest: "{{ nova_dest }}"
+
+    - name: Updating the nova-compute configuration file
+      copy:
+        src: "{{ nova_compute_src }}"
+        dest: "{{ nova_compute_dest }}"
+
+    - name: Ensure nova-compute service is up and running
+      service:
+        name: nova-compute
+        state: restarted
+        enabled: yes

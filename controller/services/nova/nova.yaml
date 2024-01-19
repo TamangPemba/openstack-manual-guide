@@ -1,0 +1,119 @@
+---
+- name: Configuring Nova Service on Controller Node!
+  hosts: controller
+  become: true
+  ignore_errors: true
+  vars_files:
+    - vars/vars.yaml
+
+  tasks:
+    - name: Ensure nova database is present
+      mysql_db:
+        name: "{{ nova_db }}"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    
+    - name: Ensure nova_api database is present
+      mysql_db:
+        name: "{{ nova_api_db }}"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+
+    - name: Ensure nova_cell0 database is present
+      mysql_db:
+        name: "{{ nova_cell_db }}"
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure nova DB user (localhost)
+      mysql_user:
+        name: "{{ db_user }}"
+        update_password: always
+        password: "{{ db_pass }}"
+        host: "localhost"
+        priv:
+          'nova.*': 'ALL'
+          'nova_api.*': 'ALL'
+          'nova_cell0.*': 'ALL'
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure nova DB user (%)
+      mysql_user:
+        name: "{{ db_user }}"
+        update_password: always
+        password: "{{ db_pass }}"
+        host: "%"
+        priv:
+          'nova.*': 'ALL'
+          'nova_api.*': 'ALL'
+          'nova_cell0.*': 'ALL'
+        state: present
+        login_unix_socket: "{{ mysql_socket }}"
+
+    - name: Ensure nova Packages are  present
+      apt:
+        name:
+          - "{{ nova_api_pkg }}"
+          - "{{ nova_conductor }}"
+          - "{{ nova_proxy }}"
+          - "{{ nova_scheduler }}"
+        state: latest
+        update_cache: yes
+
+    - name: Updating the nova configuration file
+      copy:
+        src: "{{ nova_src }}"
+        dest: "{{ nova_dest }}"
+
+    - name: Ensure /root/nova directory is present
+      file:
+        path: /root/nova
+        state: directory
+
+    - name: Ensure user.sh in /root/nova directory
+      copy:
+        src: "{{ user_src }}"
+        dest: "{{ user_dest }}"
+        mode: '0755'
+
+    - name: Ensure verify.sh in /root/nova/ directory
+      copy:
+        src: "{{ verify_src }}"
+        dest: "{{ verify_dest }}"
+        mode: '0755'
+
+    - name: Ensure discover.sh in /root/nova/ directory 
+      copy:
+        src: "{{ discover_src }}"
+        dest: "{{ discover_dest }}"
+        mode: '0755'
+
+    - name: Pupulating nova-api DB
+      command: su -s /bin/sh -c "nova-manage api_db sync" "{{ nova_db }}"
+       
+    - name: Registrating cell0 DB
+      command: su -s /bin/sh -c "nova-manage cell_v2 map_cell0" "{{ nova_db }}"
+
+    - name: Creating the cell1 cell
+      command: su -s /bin/sh -c "nova-manage cell_v2 create_cell --name=cell1 --verbose" "{{ nova_db }}"
+
+    - name: Populating nova database
+      command: su -s /bin/sh -c "nova-manage db sync" "{{ nova_db }}"
+
+    - name: Verify nova cell0 and cell1 are registred correctly
+      command: su -s /bin/sh -c "nova-manage cell_v2 list_cells" "{{ nova_db }}"
+
+
+    - name: Ensure nova service is up and running
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      loop:
+        - nova-api
+        - nova-scheduler
+        - nova-conductor
+        - nova-novncproxy

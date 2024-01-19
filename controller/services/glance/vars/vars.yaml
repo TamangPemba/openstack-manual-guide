@@ -7,5 +7,9 @@ glance_src: "{{ playbook_dir }}/files/glance-api.conf"
 glance_dest: /etc/glance/glance-api.conf
 glance_user: glance
 glance_domain: Default
-glancecmd_src: "{{ playbook_dir }}/files/glancecmd.txt"
-glancecmd_dest: /root/
+user_src: "{{ playbook_dir }}/files/user.sh"
+user_dest: /root/glance/user.sh
+verify_src: "{{ playbook_dir }}/files/verify.sh"
+verify_dest: /root/glance/verify.sh
+img_src: "{{ playbook_dir }}/files/cirros-0.4.0-x86_64-disk.img"
+img_dest: /root/glance/cirros-0.4.0-x86_64-disk.img

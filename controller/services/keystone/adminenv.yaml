@@ -5,13 +5,33 @@
   ignore_errors: true
   vars:
     env_src: files/adminenv
-    env_dest: /root/adminenv
+    env_dest: /root/keystone/adminenv
+    create_src: files/create.sh
+    create_dest: /root/keystone/create.sh
+    verify_src: files/verify.sh
+    verify_dest: /root/keystone/veriy.sh
+  
   tasks:
+    - name: ensure keystone directory is present
+      file:
+        path: /root/keystone
+        owner: root
+        group: root
+        state: directory
+
     - name: Ensure env variables are present on root home directory
       copy:
         src: "{{ env_src }}"
         dest: "{{ env_dest }}"
 
-    - name: =======NOTE==========
-      debug:
-        msg: "use source adminenv (filename) on root home directory of controller node to set env variables"
+    - name: Ensure create.sh is present on /root/keystone directory
+      copy:
+        src: "{{ create_src }}"
+        dest: "{{ create_dest }}"
+        mode: '0755'
+
+    - name: Ensure verify.sh is present on /root/keystone directory
+      copy:
+        src: "{{ verify_src }}"
+        dest: "{{ verify_dest }}"
+        mode: '0755'

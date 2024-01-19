@@ -44,16 +44,29 @@
       copy:
         src: "{{ glance_src }}"
         dest: "{{ glance_dest }}"
-    
-    - name: Copying glance cmd file 
-      copy:
-        src: "{{ glancecmd_src }}"
-        dest: "{{ glancecmd_dest }}"
 
-    - name: =======NOTE To ensure read access to glance! ====== 
-      debug:
-        msg: "RUN from controller node shell:  openstack role add --user glance --user-domain Default --system all reader"
+    - name: Ensure glance directory is present
+      file:
+        path: /root/glance
+        state: directory
+
+    - name: Ensure test iso file is present
+      copy:
+        src: "{{ img_src }}"
+        dest: "{{ img_dest }}"
     
+    - name: Ensure user.sh is present on /root/glance directory 
+      copy:
+        src: "{{ user_src }}"
+        dest: "{{ user_dest }}"
+        mode: '0755'
+
+    - name: Ensure verify.sh is present on /root/glance directory 
+      copy:
+        src: "{{ verify_src }}"
+        dest: "{{ verify_dest }}"
+        mode: '0755'
+
     - name: Pupulating Image Service DB
       command: su -s /bin/sh -c "glance-manage db_sync" "{{ glance_user }}"
         

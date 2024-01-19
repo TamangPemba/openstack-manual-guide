@@ -7,5 +7,7 @@ placement_src: "{{ playbook_dir }}/files/placement.conf"
 placement_dest: /etc/placement/placement.conf
 placement_user: placement
 placement_domain: Default
-placementcmd_src: "{{ playbook_dir }}/files/placementcmd.txt"
-placementcmd_dest: /root
+user_src: "{{ playbook_dir }}/files/user.sh"
+user_dest: /root/placement/user.sh
+verify_src: "{{ playbook_dir }}/files/verify.sh"
+verify_dest: /root/placement/verify.sh

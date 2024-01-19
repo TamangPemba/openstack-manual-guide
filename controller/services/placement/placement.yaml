@@ -45,10 +45,22 @@
         src: "{{ placement_src }}"
         dest: "{{ placement_dest }}"
 
-    - name: CMD for placement
+    - name: Make sure placement directory is present
+      file:
+        path: /root/placement
+        state: directory
+
+    - name: Ensure user.sh in /root/placement directory
       copy:
-        src: "{{ placementcmd_src }}"
-        dest: "{{ placementcmd_dest }}"
+        src: "{{ user_src }}"
+        dest: "{{ user_dest }}"
+        mode: '0755'
+
+    - name: Ensure verify.sh in /root/placement directory
+      copy:
+        src: "{{ verify_src }}"
+        dest: "{{ verify_dest }}"
+        mode: '0755'
 
     - name: Pupulating Image Service DB
       command: su -s /bin/sh -c "placement-manage db sync" "{{ db_name }}"
