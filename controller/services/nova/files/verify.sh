@@ -6,7 +6,7 @@ echo "RUN THIS COMMAND BEFORE PROCEEDING: source admin-openrc "
 echo
 echo "Listing Services"
 echo
-echo" openstack compute service list"
+echo "openstack compute service list"
 openstack compute service list
 echo
 echo "openstack catalog list"

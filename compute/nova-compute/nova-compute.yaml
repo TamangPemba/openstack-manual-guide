@@ -7,6 +7,9 @@
     - vars/vars.yaml
 
   tasks:
+    - name: Ensure OpensStack repository is present
+      command: add-apt-repository -y "{{ openstack_repo }}"
+
     - name: Ensure nova Packages is present
       apt:
         name: "{{ nova_pkg }}"

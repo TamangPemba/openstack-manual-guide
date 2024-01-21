@@ -76,6 +76,17 @@
         src: "{{ nova_src }}"
         dest: "{{ nova_dest }}"
 
+    - name: Ensure /root/neutron directory is present
+      file:
+        path: /root/neutron
+        state: directory
+
+    - name: Ensure user.sh in neutron directory
+      copy:
+        src: "{{ user_src }}"
+        dest: "{{ user_dest }}"
+        mode: '0755'
+
     - name: Pupulating Image Service DB
       command: su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" "{{ db_name }}"
         
