@@ -5,4 +5,5 @@ openvswitch_src: "{{ playbook_dir }}/files/openvswitch_agent.ini"
 openvswitch_dest: /etc/neutron/plugins/ml2/openvswitch_agent.ini
 nova_src: "{{ playbook_dir }}/files/nova.conf"
 nova_dest: /etc/nova/nova.conf
-
+bridge_src: "{{ playbook_dir }}/files/bridge.sh"
+bridge_dest: /root/

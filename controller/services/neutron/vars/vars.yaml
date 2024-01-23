@@ -18,3 +18,5 @@ nova_src: "{{ playbook_dir }}/files/nova.conf"
 nova_dest: /etc/nova/nova.conf
 user_src: "{{ playbook_dir }}/files/user.sh"
 user_dest: /root/neutron/user.sh
+bridge_src: "{{ playbook_dir }}/files/bridge.sh"
+bridge_dest: /root/neutron/bridge.sh

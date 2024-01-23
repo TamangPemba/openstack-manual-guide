@@ -10,7 +10,7 @@
     - name: Ensure Django is present (dependencies)
       pip:
         name:
-          - "{{ dep_pkg }}"
+          - "{{ django_pkg }}"
         state: present
 
     - name: Veryfying Django Version

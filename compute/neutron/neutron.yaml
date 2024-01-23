@@ -28,6 +28,12 @@
         src: "{{ nova_src }}"
         dest: "{{ nova_dest }}"
 
+    - name: Ensure bridge.sh in compute node
+      copy:
+        src: "{{ bridge_src }}"
+        dest: "{{ bridge_dest }}"
+
+
     - name: Ensure neutron service is up and running
       service:
         name: "{{ item }}"
